@@ -110,6 +110,31 @@ button{
 <div class="grid" id="grid"></div>
 
 <script>
+ // --- VERIFICATION CONTEXTE IMMEDIATE ---
+
+(function(){
+
+    const team = JSON.parse(localStorage.getItem("current_team"));
+    const tournament = localStorage.getItem("tournament_id");
+    const phase = localStorage.getItem("phase");
+    const matchNumber = localStorage.getItem("match_number");
+    const station = localStorage.getItem("station_id");
+
+    const invalid =
+        !team ||
+        team.length !== 3 ||
+        !tournament || tournament.trim() === "" ||
+        !phase || phase.trim() === "" ||
+        !matchNumber || matchNumber.trim() === "" ||
+        !station || station.trim() === "";
+
+    if (invalid) {
+        console.warn("Contexte invalide, redirection...");
+        window.location.replace("index.html");
+        return;
+    }
+
+})();
 
  // --- VERROUILLAGE CONTEXTE ---
 
@@ -254,5 +279,6 @@ function endMatch(){
 
 </body>
 </html>
+
 
 
