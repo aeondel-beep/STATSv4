@@ -3,387 +3,329 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Station Stats V8</title>
+<title>Station Stats V8.2.0</title>
 
 <style>
-:root {
-    --bg: #f4f6f9;
-    --offense: #ffe0cc;
-    --defense: #d6ebff;
-    --discipline: #ffd6d6;
-    --accent: #1f2937;
+:root{
+--bg:#f4f6f9;
+--offense:#ffe0cc;
+--defense:#d6ebff;
+--discipline:#ffd6d6;
+--accent:#1f2937;
 }
 
-body {
-    margin: 0;
-    font-family: "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
+body{
+margin:0;
+font-family:Segoe UI, sans-serif;
+background:var(--bg);
 }
 
-/* HEADER */
-.header {
-    background: var(--accent);
-    color: white;
-    padding: 12px 16px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
+.header{
+background:var(--accent);
+color:white;
+padding:10px;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+align-items:center;
 }
 
-.header input {
-    padding: 4px 6px;
-    border-radius: 4px;
-    border: none;
-    width: 120px;
+.header input{
+padding:4px;
+border-radius:4px;
+border:none;
+width:110px;
 }
 
-.header button {
-    background: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
+.header button{
+padding:6px 10px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:600;
 }
 
-/* GRID */
-.grid {
-    display: grid;
-    grid-template-columns: 160px repeat(3, 1fr);
-    gap: 8px;
-    padding: 16px;
+.grid{
+display:grid;
+grid-template-columns:160px repeat(3,1fr);
+gap:8px;
+padding:16px;
 }
 
-.player-header {
-    text-align: center;
-    font-weight: 700;
+.player-header{text-align:center;font-weight:700;}
+
+.category{
+grid-column:span 4;
+display:flex;
+justify-content:space-between;
+padding:8px;
+font-weight:700;
+border-radius:6px;
+margin-top:10px;
 }
 
-.category {
-    grid-column: span 4;
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 12px;
-    font-weight: 700;
-    border-radius: 6px;
-    margin-top: 10px;
+.offense{background:var(--offense);}
+.defense{background:var(--defense);}
+.discipline{background:var(--discipline);}
+
+.criterion{padding:14px;font-weight:600;}
+
+.cell{
+border-radius:10px;
+cursor:pointer;
+position:relative;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:70px;
+font-weight:600;
 }
 
-.offense { background: var(--offense); }
-.defense { background: var(--defense); }
-.discipline { background: var(--discipline); }
+.cell.main{min-height:100px;}
+.cell.offense{background:var(--offense);}
+.cell.defense{background:var(--defense);}
+.cell.discipline{background:var(--discipline);}
 
-.cat-totals {
-    font-size: 14px;
-    font-weight: 600;
+.cell.flash{
+background:#22c55e!important;
+color:white;
 }
 
-.criterion {
-    padding: 16px;
-    font-weight: 600;
+.counter{
+position:absolute;
+bottom:6px;
+left:50%;
+transform:translateX(-50%);
+font-size:18px;
+opacity:0.55;
 }
 
-.cell {
-    border-radius: 10px;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 70px;
-    font-weight: 600;
+.minus{
+position:absolute;
+top:6px;
+left:8px;
+font-size:20px;
+font-weight:bold;
+background:rgba(255,255,255,0.8);
+border-radius:6px;
+padding:2px 6px;
+cursor:pointer;
 }
 
-.cell.main { min-height: 100px; }
-
-.cell.offense { background: var(--offense); }
-.cell.defense { background: var(--defense); }
-.cell.discipline { background: var(--discipline); }
-
-.cell.flash {
-    background: #22c55e !important;
-    color: white;
-}
-
-.counter {
-    position: absolute;
-    bottom: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 18px;
-    font-weight: 600;
-    opacity: 0.55;
-}
-
-.minus {
-    position: absolute;
-    top: 6px;
-    left: 8px;
-    font-size: 20px;
-    font-weight: bold;
-    background: rgba(255,255,255,0.7);
-    border-radius: 6px;
-    padding: 2px 6px;
-    cursor: pointer;
-}
+hr{margin:40px 0;}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <div>
-        Tournoi :
-        <input id="tournamentInput" placeholder="T2026">
-    </div>
-    <div>
-        Match :
-        <input id="matchInput" placeholder="R1_AvsB">
-    </div>
-    <button onclick="saveContext()">Valider</button>
-    <button onclick="endMatch()">Fin de match & Export</button>
+Tournoi <input id="tournament">
+Phase <input id="phase">
+Match <input id="match">
+Station <input id="station" placeholder="A/B">
+<button onclick="saveContext()">Valider</button>
+<button onclick="endMatch()">Fin & Export</button>
 </div>
 
 <div class="grid">
-
 <div></div>
 <div class="player-header">J1</div>
 <div class="player-header">J2</div>
 <div class="player-header">J3</div>
 
-<!-- OFFENSE -->
 <div class="category offense">
-  OFFENSE
-  <div class="cat-totals">
-    J1: <span id="offJ1">0</span> |
-    J2: <span id="offJ2">0</span> |
-    J3: <span id="offJ3">0</span>
-  </div>
+OFFENSE
+<div>
+J1:<span id="offJ1">0</span> |
+J2:<span id="offJ2">0</span> |
+J3:<span id="offJ3">0</span>
+</div>
 </div>
 
 <div class="criterion">SHOT</div>
-<div class="cell main offense" onclick="addEvent('J1','SHOT',this)">
-<span class="minus" onclick="removeEvent(event,'J1','SHOT',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main offense" onclick="addEvent('J2','SHOT',this)">
-<span class="minus" onclick="removeEvent(event,'J2','SHOT',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main offense" onclick="addEvent('J3','SHOT',this)">
-<span class="minus" onclick="removeEvent(event,'J3','SHOT',this)">−</span>
-<span class="counter">0</span>
-</div>
+<div class="cell main offense" onclick="addEvent('J1','SHOT',this)"><span class="minus" onclick="removeEvent(event,'J1','SHOT',this)">−</span><span class="counter">0</span></div>
+<div class="cell main offense" onclick="addEvent('J2','SHOT',this)"><span class="minus" onclick="removeEvent(event,'J2','SHOT',this)">−</span><span class="counter">0</span></div>
+<div class="cell main offense" onclick="addEvent('J3','SHOT',this)"><span class="minus" onclick="removeEvent(event,'J3','SHOT',this)">−</span><span class="counter">0</span></div>
 
 <div class="criterion">ASSIST</div>
-<div class="cell main offense" onclick="addEvent('J1','ASSIST',this)">
-<span class="minus" onclick="removeEvent(event,'J1','ASSIST',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main offense" onclick="addEvent('J2','ASSIST',this)">
-<span class="minus" onclick="removeEvent(event,'J2','ASSIST',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main offense" onclick="addEvent('J3','ASSIST',this)">
-<span class="minus" onclick="removeEvent(event,'J3','ASSIST',this)">−</span>
-<span class="counter">0</span>
-</div>
+<div class="cell main offense" onclick="addEvent('J1','ASSIST',this)"><span class="minus" onclick="removeEvent(event,'J1','ASSIST',this)">−</span><span class="counter">0</span></div>
+<div class="cell main offense" onclick="addEvent('J2','ASSIST',this)"><span class="minus" onclick="removeEvent(event,'J2','ASSIST',this)">−</span><span class="counter">0</span></div>
+<div class="cell main offense" onclick="addEvent('J3','ASSIST',this)"><span class="minus" onclick="removeEvent(event,'J3','ASSIST',this)">−</span><span class="counter">0</span></div>
 
 <div class="criterion">GOAL</div>
-<div class="cell offense" onclick="addEvent('J1','GOAL',this)">
-<span class="minus" onclick="removeEvent(event,'J1','GOAL',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell offense" onclick="addEvent('J2','GOAL',this)">
-<span class="minus" onclick="removeEvent(event,'J2','GOAL',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell offense" onclick="addEvent('J3','GOAL',this)">
-<span class="minus" onclick="removeEvent(event,'J3','GOAL',this)">−</span>
-<span class="counter">0</span>
-</div>
+<div class="cell offense" onclick="addEvent('J1','GOAL',this)"><span class="minus" onclick="removeEvent(event,'J1','GOAL',this)">−</span><span class="counter">0</span></div>
+<div class="cell offense" onclick="addEvent('J2','GOAL',this)"><span class="minus" onclick="removeEvent(event,'J2','GOAL',this)">−</span><span class="counter">0</span></div>
+<div class="cell offense" onclick="addEvent('J3','GOAL',this)"><span class="minus" onclick="removeEvent(event,'J3','GOAL',this)">−</span><span class="counter">0</span></div>
 
-<!-- DEFENSE -->
 <div class="category defense">
-  DEFENSE
-  <div class="cat-totals">
-    J1: <span id="defJ1">0</span> |
-    J2: <span id="defJ2">0</span> |
-    J3: <span id="defJ3">0</span>
-  </div>
+DEFENSE
+<div>
+J1:<span id="defJ1">0</span> |
+J2:<span id="defJ2">0</span> |
+J3:<span id="defJ3">0</span>
+</div>
 </div>
 
 <div class="criterion">SAVE</div>
-<div class="cell main defense" onclick="addEvent('J1','SAVE',this)">
-<span class="minus" onclick="removeEvent(event,'J1','SAVE',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main defense" onclick="addEvent('J2','SAVE',this)">
-<span class="minus" onclick="removeEvent(event,'J2','SAVE',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main defense" onclick="addEvent('J3','SAVE',this)">
-<span class="minus" onclick="removeEvent(event,'J3','SAVE',this)">−</span>
-<span class="counter">0</span>
-</div>
+<div class="cell main defense" onclick="addEvent('J1','SAVE',this)"><span class="minus" onclick="removeEvent(event,'J1','SAVE',this)">−</span><span class="counter">0</span></div>
+<div class="cell main defense" onclick="addEvent('J2','SAVE',this)"><span class="minus" onclick="removeEvent(event,'J2','SAVE',this)">−</span><span class="counter">0</span></div>
+<div class="cell main defense" onclick="addEvent('J3','SAVE',this)"><span class="minus" onclick="removeEvent(event,'J3','SAVE',this)">−</span><span class="counter">0</span></div>
 
 <div class="criterion">RECOVERY</div>
-<div class="cell main defense" onclick="addEvent('J1','RECOVERY',this)">
-<span class="minus" onclick="removeEvent(event,'J1','RECOVERY',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main defense" onclick="addEvent('J2','RECOVERY',this)">
-<span class="minus" onclick="removeEvent(event,'J2','RECOVERY',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell main defense" onclick="addEvent('J3','RECOVERY',this)">
-<span class="minus" onclick="removeEvent(event,'J3','RECOVERY',this)">−</span>
-<span class="counter">0</span>
-</div>
+<div class="cell main defense" onclick="addEvent('J1','RECOVERY',this)"><span class="minus" onclick="removeEvent(event,'J1','RECOVERY',this)">−</span><span class="counter">0</span></div>
+<div class="cell main defense" onclick="addEvent('J2','RECOVERY',this)"><span class="minus" onclick="removeEvent(event,'J2','RECOVERY',this)">−</span><span class="counter">0</span></div>
+<div class="cell main defense" onclick="addEvent('J3','RECOVERY',this)"><span class="minus" onclick="removeEvent(event,'J3','RECOVERY',this)">−</span><span class="counter">0</span></div>
 
-<!-- DISCIPLINE -->
 <div class="category discipline">
-  DISCIPLINE
-  <div class="cat-totals">
-    J1: <span id="disJ1">0</span> |
-    J2: <span id="disJ2">0</span> |
-    J3: <span id="disJ3">0</span>
-  </div>
+DISCIPLINE
+<div>
+J1:<span id="disJ1">0</span> |
+J2:<span id="disJ2">0</span> |
+J3:<span id="disJ3">0</span>
+</div>
 </div>
 
 <div class="criterion">FOUL</div>
-<div class="cell discipline" onclick="addEvent('J1','FOUL',this)">
-<span class="minus" onclick="removeEvent(event,'J1','FOUL',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell discipline" onclick="addEvent('J2','FOUL',this)">
-<span class="minus" onclick="removeEvent(event,'J2','FOUL',this)">−</span>
-<span class="counter">0</span>
-</div>
-<div class="cell discipline" onclick="addEvent('J3','FOUL',this)">
-<span class="minus" onclick="removeEvent(event,'J3','FOUL',this)">−</span>
-<span class="counter">0</span>
-</div>
+<div class="cell discipline" onclick="addEvent('J1','FOUL',this)"><span class="minus" onclick="removeEvent(event,'J1','FOUL',this)">−</span><span class="counter">0</span></div>
+<div class="cell discipline" onclick="addEvent('J2','FOUL',this)"><span class="minus" onclick="removeEvent(event,'J2','FOUL',this)">−</span><span class="counter">0</span></div>
+<div class="cell discipline" onclick="addEvent('J3','FOUL',this)"><span class="minus" onclick="removeEvent(event,'J3','FOUL',this)">−</span><span class="counter">0</span></div>
 
 </div>
+
+<hr>
+
+<h3>Fusion Multi-Station</h3>
+<input type="file" id="fileA" accept=".csv">
+<input type="file" id="fileB" accept=".csv">
+<button onclick="mergeCSVs()">Fusionner</button>
 
 <script>
-let log = [];
 
-let CURRENT_TOURNAMENT_ID = localStorage.getItem("tournament_id") || "";
-let CURRENT_MATCH_ID = localStorage.getItem("match_id") || "";
+let log=[];
 
-document.getElementById("tournamentInput").value = CURRENT_TOURNAMENT_ID;
-document.getElementById("matchInput").value = CURRENT_MATCH_ID;
+let CURRENT_TOURNAMENT="";
+let CURRENT_PHASE="";
+let CURRENT_MATCH="";
+let CURRENT_STATION="";
 
-function saveContext() {
-    CURRENT_TOURNAMENT_ID = document.getElementById("tournamentInput").value;
-    CURRENT_MATCH_ID = document.getElementById("matchInput").value;
-
-    localStorage.setItem("tournament_id", CURRENT_TOURNAMENT_ID);
-    localStorage.setItem("match_id", CURRENT_MATCH_ID);
+function saveContext(){
+CURRENT_TOURNAMENT=document.getElementById("tournament").value;
+CURRENT_PHASE=document.getElementById("phase").value;
+CURRENT_MATCH=document.getElementById("match").value;
+CURRENT_STATION=document.getElementById("station").value;
 }
 
-const RULES = { GOAL: ["SHOT"] };
+const RULES={GOAL:["SHOT"]};
 
-function addEvent(player, critere, element) {
-    processEvent(player, critere, element);
-
-    if (RULES[critere]) {
-        RULES[critere].forEach(dep => {
-            let cell = findCell(player, dep);
-            processEvent(player, dep, cell);
-        });
-    }
-
-    updateTotals();
+function addEvent(player,critere,element){
+processEvent(player,critere,element);
+if(RULES[critere]){
+RULES[critere].forEach(dep=>{
+let cell=findCell(player,dep);
+processEvent(player,dep,cell);
+});
+}
+updateTotals();
 }
 
-function processEvent(player, critere, element) {
-    log.push({
-        date: new Date().toISOString(),
-        tournament_id: CURRENT_TOURNAMENT_ID,
-        match_id: CURRENT_MATCH_ID,
-        joueur: player,
-        critere
-    });
-
-    let counter = element.querySelector(".counter");
-    counter.textContent = parseInt(counter.textContent) + 1;
-
-    element.classList.add("flash");
-    setTimeout(() => element.classList.remove("flash"), 120);
+function processEvent(player,critere,element){
+log.push({
+date:new Date().toISOString(),
+tournament_id:CURRENT_TOURNAMENT,
+phase:CURRENT_PHASE,
+match:CURRENT_MATCH,
+station:CURRENT_STATION,
+joueur:player,
+critere
+});
+let counter=element.querySelector(".counter");
+counter.textContent=parseInt(counter.textContent)+1;
+element.classList.add("flash");
+setTimeout(()=>element.classList.remove("flash"),120);
 }
 
-function removeEvent(e, player, critere, minusElement) {
-    e.stopPropagation();
-    let cell = minusElement.parentElement;
-
-    for (let i = log.length - 1; i >= 0; i--) {
-        if (log[i].joueur === player && log[i].critere === critere) {
-            log.splice(i, 1);
-            let counter = cell.querySelector(".counter");
-            let val = parseInt(counter.textContent);
-            if (val > 0) counter.textContent = val - 1;
-            break;
-        }
-    }
-
-    updateTotals();
+function removeEvent(e,player,critere,minusElement){
+e.stopPropagation();
+let cell=minusElement.parentElement;
+for(let i=log.length-1;i>=0;i--){
+if(log[i].joueur===player&&log[i].critere===critere){
+log.splice(i,1);
+let counter=cell.querySelector(".counter");
+let val=parseInt(counter.textContent);
+if(val>0)counter.textContent=val-1;
+break;
+}}
+updateTotals();
 }
 
-function updateTotals() {
-    const categories = {
-        off: ["SHOT","ASSIST","GOAL"],
-        def: ["SAVE","RECOVERY"],
-        dis: ["FOUL"]
-    };
-
-    ["J1","J2","J3"].forEach(player => {
-        document.getElementById("off"+player).textContent =
-            log.filter(e => e.joueur === player && categories.off.includes(e.critere)).length;
-
-        document.getElementById("def"+player).textContent =
-            log.filter(e => e.joueur === player && categories.def.includes(e.critere)).length;
-
-        document.getElementById("dis"+player).textContent =
-            log.filter(e => e.joueur === player && categories.dis.includes(e.critere)).length;
-    });
+function updateTotals(){
+const categories={
+off:["SHOT","ASSIST","GOAL"],
+def:["SAVE","RECOVERY"],
+dis:["FOUL"]
+};
+["J1","J2","J3"].forEach(p=>{
+document.getElementById("off"+p).textContent=
+log.filter(e=>e.joueur===p&&categories.off.includes(e.critere)).length;
+document.getElementById("def"+p).textContent=
+log.filter(e=>e.joueur===p&&categories.def.includes(e.critere)).length;
+document.getElementById("dis"+p).textContent=
+log.filter(e=>e.joueur===p&&categories.dis.includes(e.critere)).length;
+});
 }
 
-function findCell(player, critere) {
-    let labels = document.querySelectorAll(".criterion");
-    for (let label of labels) {
-        if (label.textContent.trim() === critere) {
-            let next = label.nextElementSibling;
-            let cells = [];
-            for (let i = 0; i < 3; i++) {
-                cells.push(next);
-                next = next.nextElementSibling;
-            }
-            return cells[["J1","J2","J3"].indexOf(player)];
-        }
-    }
+function findCell(player,critere){
+let labels=document.querySelectorAll(".criterion");
+for(let label of labels){
+if(label.textContent.trim()===critere){
+let next=label.nextElementSibling;
+let cells=[];
+for(let i=0;i<3;i++){cells.push(next);next=next.nextElementSibling;}
+return cells[["J1","J2","J3"].indexOf(player)];
+}}
 }
 
-function endMatch() {
-    let csv = "date,tournament_id,match_id,joueur,critere\n";
-    log.forEach(e =>
-        csv += `${e.date},${e.tournament_id},${e.match_id},${e.joueur},${e.critere}\n`
-    );
-
-    let blob = new Blob([csv], { type: 'text/csv' });
-    let url = URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = CURRENT_MATCH_ID + "_export.csv";
-    a.click();
-
-    log = [];
-    document.querySelectorAll(".counter").forEach(c => c.textContent = "0");
-    updateTotals();
+function endMatch(){
+let csv="date,tournament_id,phase,match,station,joueur,critere\n";
+log.forEach(e=>{
+csv+=`${e.date},${e.tournament_id},${e.phase},${e.match},${e.station},${e.joueur},${e.critere}\n`;
+});
+downloadCSV(csv, CURRENT_MATCH+"_export.csv");
+log=[];
+document.querySelectorAll(".counter").forEach(c=>c.textContent="0");
+updateTotals();
 }
+
+function mergeCSVs(){
+const fileA=document.getElementById("fileA").files[0];
+const fileB=document.getElementById("fileB").files[0];
+if(!fileA||!fileB){alert("Sélectionne les deux fichiers");return;}
+Promise.all([readFile(fileA),readFile(fileB)]).then(results=>{
+let a=results[0].trim().split("\n");
+let b=results[1].trim().split("\n");
+b.shift();
+let merged=[a[0]].concat(a.slice(1)).concat(b);
+downloadCSV(merged.join("\n"),"merged_match.csv");
+});
+}
+
+function readFile(file){
+return new Promise(resolve=>{
+let reader=new FileReader();
+reader.onload=e=>resolve(e.target.result);
+reader.readAsText(file);
+});
+}
+
+function downloadCSV(content,name){
+const blob=new Blob([content],{type:'text/csv'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;
+a.download=name;
+a.click();
+}
+
 </script>
 
 </body>
