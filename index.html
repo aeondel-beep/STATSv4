@@ -206,7 +206,8 @@ let log = [];
 
 function addEvent(player, critere, element) {
 
-    function logAndIncrement(p, c, el) {
+    function logAndIncrement(p, c) {
+
         log.push({
             date: new Date().toISOString(),
             match_id: "PROTOTYPE",
@@ -215,33 +216,26 @@ function addEvent(player, critere, element) {
             critere: c
         });
 
-        if (el) {
-            let counter = el.querySelector(".counter");
+        // Trouver la cellule correspondante
+        let cell = document.querySelector(
+            `.cell[data-player="${p}"][data-critere="${c}"]`
+        );
+
+        if (cell) {
+            let counter = cell.querySelector(".counter");
             counter.textContent = parseInt(counter.textContent) + 1;
 
-            el.classList.add("flash");
-            setTimeout(() => el.classList.remove("flash"), 120);
+            cell.classList.add("flash");
+            setTimeout(() => cell.classList.remove("flash"), 120);
         }
     }
 
-    // 1️⃣ Toujours enregistrer l’événement principal
-    logAndIncrement(player, critere, element);
+    // Toujours enregistrer l’événement principal
+    logAndIncrement(player, critere);
 
-    // 2️⃣ Si GOAL → ajouter automatiquement un SHOT
+    // Règle métier : GOAL implique SHOT
     if (critere === "GOAL") {
-
-        // Trouver la cellule SHOT correspondante
-        let shotCell = Array.from(document.querySelectorAll(".criterion"))
-            .find(c => c.textContent === "SHOT")
-            ?.parentElement
-            ?.querySelectorAll(".cell");
-
-        if (shotCell) {
-            let playerIndex = ["J1","J2","J3"].indexOf(player);
-            let targetCell = shotCell[playerIndex];
-
-            logAndIncrement(player, "SHOT", targetCell);
-        }
+        logAndIncrement(player, "SHOT");
     }
 }
 
@@ -267,4 +261,5 @@ function resetData() {
 
 </body>
 </html>
+
 
