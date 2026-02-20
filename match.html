@@ -110,55 +110,24 @@ button{
 <div class="grid" id="grid"></div>
 
 <script>
- // --- VERIFICATION CONTEXTE IMMEDIATE ---
+// --- CHARGEMENT CONTEXTE ---
+const team = JSON.parse(localStorage.getItem("current_team"));
+const tournament = localStorage.getItem("tournament_id");
+const phase = localStorage.getItem("phase");
+const matchNumber = localStorage.getItem("match_number");
+const station = localStorage.getItem("station_id");
 
-(function(){
-
-    const team = JSON.parse(localStorage.getItem("current_team"));
-    const tournament = localStorage.getItem("tournament_id");
-    const phase = localStorage.getItem("phase");
-    const matchNumber = localStorage.getItem("match_number");
-    const station = localStorage.getItem("station_id");
-
-    const invalid =
-        !team ||
-        team.length !== 3 ||
-        !tournament || tournament.trim() === "" ||
-        !phase || phase.trim() === "" ||
-        !matchNumber || matchNumber.trim() === "" ||
-        !station || station.trim() === "";
-
-    if (invalid) {
-        console.warn("Contexte invalide, redirection...");
-        window.location.replace("index.html");
-        return;
-    }
-
-})();
-
- // --- VERROUILLAGE CONTEXTE ---
-
-let team = JSON.parse(localStorage.getItem("current_team"));
-let tournament = localStorage.getItem("tournament_id");
-let phase = localStorage.getItem("phase");
-let matchNumber = localStorage.getItem("match_number");
-let station = localStorage.getItem("station_id");
-
-function contextValid() {
-    if (!team || team.length !== 3) return false;
-    if (!tournament || tournament.trim() === "") return false;
-    if (!phase || phase.trim() === "") return false;
-    if (!matchNumber || matchNumber.trim() === "") return false;
-    if (!station || station.trim() === "") return false;
-    return true;
+// --- VERIFICATION CONTEXTE ---
+if (
+    !team ||
+    team.length !== 3 ||
+    !tournament || tournament.trim() === "" ||
+    !phase || phase.trim() === "" ||
+    !matchNumber || matchNumber.trim() === "" ||
+    !station || station.trim() === ""
+) {
+    window.location.replace("index.html");
 }
-
-if (!contextValid()) {
-    alert("Contexte incomplet. Retour au setup.");
-    window.location.href = "index.html";
-}
-
-let team=JSON.parse(localStorage.getItem("current_team"));
 if(!team){window.location.href="index.html"}
 
 let tournament=localStorage.getItem("tournament_id");
@@ -279,6 +248,7 @@ function endMatch(){
 
 </body>
 </html>
+
 
 
 
