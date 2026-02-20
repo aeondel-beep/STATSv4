@@ -18,11 +18,11 @@ body{
  font-family:Segoe UI,sans-serif;
  margin:0;
  background:var(--bg);
- padding:10px;
+ padding:15px;
 }
 
 h3{
- margin:5px 0 10px 0;
+ margin:0 0 10px 0;
 }
 
 button{
@@ -32,6 +32,8 @@ button{
  cursor:pointer;
  font-weight:600;
  margin-bottom:10px;
+ background:#1f2937;
+ color:white;
 }
 
 .grid{
@@ -70,6 +72,7 @@ button{
  background:rgba(255,255,255,0.7);
  padding:2px 6px;
  border-radius:6px;
+ cursor:pointer;
 }
 
 .counter{
@@ -89,7 +92,6 @@ button{
 .category-defense{ background:var(--defense); }
 .category-discipline{ background:var(--discipline); }
 
-/* Responsive téléphone simple */
 @media(max-width:600px){
  .grid{
   grid-template-columns:100px repeat(3,1fr);
@@ -110,14 +112,21 @@ button{
 <div class="grid" id="grid"></div>
 
 <script>
-// --- CHARGEMENT CONTEXTE ---
+
+// -----------------------------
+// CHARGEMENT CONTEXTE
+// -----------------------------
+
 const team = JSON.parse(localStorage.getItem("current_team"));
 const tournament = localStorage.getItem("tournament_id");
 const phase = localStorage.getItem("phase");
 const matchNumber = localStorage.getItem("match_number");
 const station = localStorage.getItem("station_id");
 
-// --- VERIFICATION CONTEXTE ---
+// -----------------------------
+// VERIFICATION CONTEXTE
+// -----------------------------
+
 if (
     !team ||
     team.length !== 3 ||
@@ -128,35 +137,47 @@ if (
 ) {
     window.location.replace("index.html");
 }
-if(!team){window.location.href="index.html"}
 
-let tournament=localStorage.getItem("tournament_id");
-let phase=localStorage.getItem("phase");
-let matchNumber=localStorage.getItem("match_number");
-let station=localStorage.getItem("station_id");
+// -----------------------------
+// AFFICHAGE CONTEXTE
+// -----------------------------
 
-document.getElementById("context").textContent=
+document.getElementById("context").textContent =
 `${tournament} | ${phase} | Match ${matchNumber} | Station ${station}`;
 
-let log=[];
+// -----------------------------
+// INITIALISATION
+// -----------------------------
 
-const CRITERES=[
+let log = [];
+
+const CRITERES = [
  "SHOT","ASSIST","GOAL",
  "SAVE","RECOVERY",
  "FOUL"
 ];
 
-const RULES={GOAL:["SHOT"]};
+const RULES = {
+ GOAL: ["SHOT"]
+};
 
-const grid=document.getElementById("grid");
+const grid = document.getElementById("grid");
 
-grid.innerHTML="<div></div>"+
- team.map(p=>`<div class="header-row"><strong>${p.display_name||p.full_name}</strong></div>`).join("");
+// -----------------------------
+// GENERATION GRILLE
+// -----------------------------
 
-CRITERES.forEach(c=>{
- grid.innerHTML+=`<div>${c}</div>`;
- team.forEach(p=>{
-  grid.innerHTML+=`
+grid.innerHTML =
+"<div></div>" +
+team.map(p =>
+ `<div class="header-row"><strong>${p.display_name || p.full_name}</strong></div>`
+).join("");
+
+CRITERES.forEach(c => {
+ grid.innerHTML += `<div>${c}</div>`;
+
+ team.forEach(p => {
+  grid.innerHTML += `
   <div class="cell ${getCategoryClass(c)}"
    onclick="addEvent('${p.id}','${c}',this)">
    <span class="minus"
@@ -166,6 +187,10 @@ CRITERES.forEach(c=>{
  });
 });
 
+// -----------------------------
+// CATEGORIES
+// -----------------------------
+
 function getCategoryClass(critere){
  if(["SHOT","ASSIST","GOAL"].includes(critere))
    return "category-offense";
@@ -174,8 +199,14 @@ function getCategoryClass(critere){
  return "category-discipline";
 }
 
+// -----------------------------
+// AJOUT EVENEMENT
+// -----------------------------
+
 function addEvent(playerId,critere,el){
+
  processEvent(playerId,critere,el);
+
  if(RULES[critere]){
   RULES[critere].forEach(dep=>{
    const depCell=findCell(playerId,dep);
@@ -185,6 +216,7 @@ function addEvent(playerId,critere,el){
 }
 
 function processEvent(playerId,critere,el){
+
  log.push({
   timestamp:new Date().toISOString(),
   tournament,
@@ -194,26 +226,39 @@ function processEvent(playerId,critere,el){
   player_id:playerId,
   critere
  });
+
  el.querySelector(".counter").textContent++;
  el.classList.add("flash");
  setTimeout(()=>el.classList.remove("flash"),120);
 }
 
+// -----------------------------
+// SUPPRESSION EVENEMENT
+// -----------------------------
+
 function removeEvent(e,playerId,critere,minusEl){
+
  e.stopPropagation();
- const cell=minusEl.parentElement;
+ const cell = minusEl.parentElement;
+
  for(let i=log.length-1;i>=0;i--){
-  if(log[i].player_id===playerId&&log[i].critere===critere){
+  if(log[i].player_id===playerId && log[i].critere===critere){
    log.splice(i,1);
-   let c=cell.querySelector(".counter");
-   if(c.textContent>0)c.textContent--;
+   let c = cell.querySelector(".counter");
+   if(c.textContent>0) c.textContent--;
    break;
   }
  }
 }
 
+// -----------------------------
+// TROUVER CELL DEPENDANTE
+// -----------------------------
+
 function findCell(playerId,critere){
- const rows=[...grid.children];
+
+ const rows = [...grid.children];
+
  for(let i=0;i<rows.length;i++){
   if(rows[i].textContent===critere){
    return rows[i+1+team.findIndex(p=>p.id===playerId)];
@@ -221,9 +266,14 @@ function findCell(playerId,critere){
  }
 }
 
+// -----------------------------
+// FIN MATCH + RESET
+// -----------------------------
+
 function endMatch(){
 
  let csv="timestamp,tournament,phase,match,station,player_id,critere\n";
+
  log.forEach(e=>{
   csv+=`${e.timestamp},${e.tournament},${e.phase},${e.matchNumber},${e.station},${e.player_id},${e.critere}\n`;
  });
@@ -235,20 +285,16 @@ function endMatch(){
  a.download=`${matchNumber}_${station}.csv`;
  a.click();
 
- // Reset sauf Tournament ID
+ // RESET CONTEXTE MATCH (pas tournament)
  localStorage.removeItem("current_team");
  localStorage.removeItem("phase");
  localStorage.removeItem("match_number");
  localStorage.removeItem("station_id");
 
- window.location.href="index.html";
+ window.location.replace("index.html");
 }
 
 </script>
 
 </body>
 </html>
-
-
-
-
