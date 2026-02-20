@@ -3,17 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Station Stats V7</title>
+<title>Station Stats V8</title>
 
 <style>
 :root {
     --bg: #f4f6f9;
-    --border: #e0e4ea;
-
     --offense: #ffe0cc;
     --defense: #d6ebff;
     --discipline: #ffd6d6;
-
     --accent: #1f2937;
 }
 
@@ -27,16 +24,24 @@ body {
 .header {
     background: var(--accent);
     color: white;
-    padding: 14px 20px;
+    padding: 12px 16px;
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
     align-items: center;
+}
+
+.header input {
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: none;
+    width: 120px;
 }
 
 .header button {
     background: white;
     border: none;
-    padding: 8px 14px;
+    padding: 6px 10px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
@@ -55,12 +60,10 @@ body {
     font-weight: 700;
 }
 
-/* CATEGORY */
 .category {
     grid-column: span 4;
     display: flex;
     justify-content: space-between;
-    align-items: center;
     padding: 8px 12px;
     font-weight: 700;
     border-radius: 6px;
@@ -81,7 +84,6 @@ body {
     font-weight: 600;
 }
 
-/* CELLS */
 .cell {
     border-radius: 10px;
     cursor: pointer;
@@ -104,36 +106,26 @@ body {
     color: white;
 }
 
-/* BOUTON MOINS PLUS GROS + SURBRILLANCE */
-.minus {
-    position: absolute;
-    top: 6px;
-    left: 8px;
-    font-size: 20px;           /* +25% environ */
-    font-weight: bold;
-    color: #222;
-    background: rgba(255,255,255,0.7);
-    border-radius: 6px;
-    padding: 2px 6px;
-    cursor: pointer;
-    transition: 0.15s;
-}
-
-.minus:hover {
-    background: #ffb3b3;       /* surlignage léger rouge */
-    transform: scale(1.1);
-}
-
-
-/* COMPTEUR PLUS GRAND, CENTRÉ EN BAS, MOINS CONTRASTÉ */
 .counter {
     position: absolute;
     bottom: 6px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 18px;           /* plus grand */
+    font-size: 18px;
     font-weight: 600;
-    opacity: 0.55;             /* moins contrasté */
+    opacity: 0.55;
+}
+
+.minus {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    background: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    padding: 2px 6px;
+    cursor: pointer;
 }
 </style>
 </head>
@@ -141,7 +133,15 @@ body {
 <body>
 
 <div class="header">
-    <div>Match Prototype</div>
+    <div>
+        Tournoi :
+        <input id="tournamentInput" placeholder="T2026">
+    </div>
+    <div>
+        Match :
+        <input id="matchInput" placeholder="R1_AvsB">
+    </div>
+    <button onclick="saveContext()">Valider</button>
     <button onclick="endMatch()">Fin de match & Export</button>
 </div>
 
@@ -270,6 +270,21 @@ body {
 
 <script>
 let log = [];
+
+let CURRENT_TOURNAMENT_ID = localStorage.getItem("tournament_id") || "";
+let CURRENT_MATCH_ID = localStorage.getItem("match_id") || "";
+
+document.getElementById("tournamentInput").value = CURRENT_TOURNAMENT_ID;
+document.getElementById("matchInput").value = CURRENT_MATCH_ID;
+
+function saveContext() {
+    CURRENT_TOURNAMENT_ID = document.getElementById("tournamentInput").value;
+    CURRENT_MATCH_ID = document.getElementById("matchInput").value;
+
+    localStorage.setItem("tournament_id", CURRENT_TOURNAMENT_ID);
+    localStorage.setItem("match_id", CURRENT_MATCH_ID);
+}
+
 const RULES = { GOAL: ["SHOT"] };
 
 function addEvent(player, critere, element) {
@@ -286,35 +301,31 @@ function addEvent(player, critere, element) {
 }
 
 function processEvent(player, critere, element) {
-    log.push({ date: new Date().toISOString(), joueur: player, critere });
-    if (element) {
-        let counter = element.querySelector(".counter");
-        counter.textContent = parseInt(counter.textContent) + 1;
-        element.classList.add("flash");
-        setTimeout(() => element.classList.remove("flash"), 120);
-    }
+    log.push({
+        date: new Date().toISOString(),
+        tournament_id: CURRENT_TOURNAMENT_ID,
+        match_id: CURRENT_MATCH_ID,
+        joueur: player,
+        critere
+    });
+
+    let counter = element.querySelector(".counter");
+    counter.textContent = parseInt(counter.textContent) + 1;
+
+    element.classList.add("flash");
+    setTimeout(() => element.classList.remove("flash"), 120);
 }
 
 function removeEvent(e, player, critere, minusElement) {
-
     e.stopPropagation();
-
-    // La vraie cellule est le parent du bouton -
     let cell = minusElement.parentElement;
 
     for (let i = log.length - 1; i >= 0; i--) {
-
         if (log[i].joueur === player && log[i].critere === critere) {
-
             log.splice(i, 1);
-
             let counter = cell.querySelector(".counter");
             let val = parseInt(counter.textContent);
-
-            if (val > 0) {
-                counter.textContent = val - 1;
-            }
-
+            if (val > 0) counter.textContent = val - 1;
             break;
         }
     }
@@ -354,18 +365,21 @@ function findCell(player, critere) {
             return cells[["J1","J2","J3"].indexOf(player)];
         }
     }
-    return null;
 }
 
 function endMatch() {
-    let csv = "date,joueur,critere\n";
-    log.forEach(e => csv += `${e.date},${e.joueur},${e.critere}\n`);
+    let csv = "date,tournament_id,match_id,joueur,critere\n";
+    log.forEach(e =>
+        csv += `${e.date},${e.tournament_id},${e.match_id},${e.joueur},${e.critere}\n`
+    );
+
     let blob = new Blob([csv], { type: 'text/csv' });
     let url = URL.createObjectURL(blob);
     let a = document.createElement('a');
     a.href = url;
-    a.download = "match_export.csv";
+    a.download = CURRENT_MATCH_ID + "_export.csv";
     a.click();
+
     log = [];
     document.querySelectorAll(".counter").forEach(c => c.textContent = "0");
     updateTotals();
@@ -374,4 +388,3 @@ function endMatch() {
 
 </body>
 </html>
-
