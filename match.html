@@ -111,6 +111,28 @@ button{
 
 <script>
 
+ // --- VERROUILLAGE CONTEXTE ---
+
+let team = JSON.parse(localStorage.getItem("current_team"));
+let tournament = localStorage.getItem("tournament_id");
+let phase = localStorage.getItem("phase");
+let matchNumber = localStorage.getItem("match_number");
+let station = localStorage.getItem("station_id");
+
+function contextValid() {
+    if (!team || team.length !== 3) return false;
+    if (!tournament || tournament.trim() === "") return false;
+    if (!phase || phase.trim() === "") return false;
+    if (!matchNumber || matchNumber.trim() === "") return false;
+    if (!station || station.trim() === "") return false;
+    return true;
+}
+
+if (!contextValid()) {
+    alert("Contexte incomplet. Retour au setup.");
+    window.location.href = "index.html";
+}
+
 let team=JSON.parse(localStorage.getItem("current_team"));
 if(!team){window.location.href="index.html"}
 
@@ -232,4 +254,5 @@ function endMatch(){
 
 </body>
 </html>
+
 
