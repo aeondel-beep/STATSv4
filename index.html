@@ -206,19 +206,43 @@ let log = [];
 
 function addEvent(player, critere, element) {
 
-    log.push({
-        date: new Date().toISOString(),
-        match_id: "PROTOTYPE",
-        equipe: "A",
-        joueur: player,
-        critere: critere
-    });
+    function logAndIncrement(p, c, el) {
+        log.push({
+            date: new Date().toISOString(),
+            match_id: "PROTOTYPE",
+            equipe: "A",
+            joueur: p,
+            critere: c
+        });
 
-    let counter = element.querySelector(".counter");
-    counter.textContent = parseInt(counter.textContent) + 1;
+        if (el) {
+            let counter = el.querySelector(".counter");
+            counter.textContent = parseInt(counter.textContent) + 1;
 
-    element.classList.add("flash");
-    setTimeout(() => element.classList.remove("flash"), 120);
+            el.classList.add("flash");
+            setTimeout(() => el.classList.remove("flash"), 120);
+        }
+    }
+
+    // 1️⃣ Toujours enregistrer l’événement principal
+    logAndIncrement(player, critere, element);
+
+    // 2️⃣ Si GOAL → ajouter automatiquement un SHOT
+    if (critere === "GOAL") {
+
+        // Trouver la cellule SHOT correspondante
+        let shotCell = Array.from(document.querySelectorAll(".criterion"))
+            .find(c => c.textContent === "SHOT")
+            ?.parentElement
+            ?.querySelectorAll(".cell");
+
+        if (shotCell) {
+            let playerIndex = ["J1","J2","J3"].indexOf(player);
+            let targetCell = shotCell[playerIndex];
+
+            logAndIncrement(player, "SHOT", targetCell);
+        }
+    }
 }
 
 function exportCSV() {
@@ -243,3 +267,4 @@ function resetData() {
 
 </body>
 </html>
+
