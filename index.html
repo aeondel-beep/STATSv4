@@ -5,10 +5,91 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Setup Match</title>
 <style>
-body{font-family:sans-serif;padding:20px}
-button{margin:4px;padding:6px 10px}
-.selected{background:#22c55e;color:white}
-select,input{padding:6px;margin:4px}
+:root{
+ --bg:#f4f6f9;
+ --card:#ffffff;
+ --accent:#1f2937;
+ --primary:#2563eb;
+ --success:#22c55e;
+}
+
+body{
+ margin:0;
+ font-family:Segoe UI,sans-serif;
+ background:var(--bg);
+ padding:20px;
+}
+
+h2{
+ margin-top:0;
+}
+
+.section{
+ background:var(--card);
+ padding:20px;
+ border-radius:12px;
+ box-shadow:0 4px 10px rgba(0,0,0,0.05);
+ margin-bottom:20px;
+}
+
+label{
+ display:block;
+ margin-top:10px;
+ font-weight:600;
+}
+
+input,select{
+ width:100%;
+ padding:8px;
+ margin-top:4px;
+ border-radius:6px;
+ border:1px solid #ddd;
+ box-sizing:border-box;
+}
+
+button{
+ margin-top:12px;
+ padding:8px 12px;
+ border:none;
+ border-radius:8px;
+ cursor:pointer;
+ font-weight:600;
+}
+
+.primary{
+ background:var(--primary);
+ color:white;
+}
+
+.selected{
+ background:var(--success);
+ color:white;
+}
+
+.player-buttons{
+ display:flex;
+ flex-wrap:wrap;
+ gap:8px;
+ margin-top:10px;
+}
+
+.player-buttons button{
+ background:#e5e7eb;
+}
+
+.counter{
+ font-weight:700;
+ margin-top:10px;
+}
+
+#selectedList{
+ margin-top:10px;
+ padding-left:20px;
+}
+
+@media(max-width:600px){
+ body{padding:12px}
+}
 </style>
 </head>
 <body>
@@ -130,3 +211,4 @@ renderPlayers();
 </script>
 </body>
 </html>
+
