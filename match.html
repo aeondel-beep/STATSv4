@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Saisie Match</title>
- <style>
+
+<style>
 :root{
  --bg:#f4f6f9;
  --offense:#ffe0cc;
@@ -88,7 +89,7 @@ button{
 .category-defense{ background:var(--defense); }
 .category-discipline{ background:var(--discipline); }
 
-/* Responsive téléphone */
+/* Responsive téléphone simple */
 @media(max-width:600px){
  .grid{
   grid-template-columns:100px repeat(3,1fr);
@@ -100,6 +101,7 @@ button{
 }
 </style>
 </head>
+
 <body>
 
 <h3 id="context"></h3>
@@ -133,13 +135,13 @@ const RULES={GOAL:["SHOT"]};
 const grid=document.getElementById("grid");
 
 grid.innerHTML="<div></div>"+
- team.map(p=>`<div><strong>${p.display_name||p.full_name}</strong></div>`).join("");
+ team.map(p=>`<div class="header-row"><strong>${p.display_name||p.full_name}</strong></div>`).join("");
 
 CRITERES.forEach(c=>{
  grid.innerHTML+=`<div>${c}</div>`;
  team.forEach(p=>{
   grid.innerHTML+=`
-  <<div class="cell ${getCategoryClass(c)}"
+  <div class="cell ${getCategoryClass(c)}"
    onclick="addEvent('${p.id}','${c}',this)">
    <span class="minus"
     onclick="removeEvent(event,'${p.id}','${c}',this)">−</span>
@@ -148,14 +150,14 @@ CRITERES.forEach(c=>{
  });
 });
 
- function getCategoryClass(critere){
+function getCategoryClass(critere){
  if(["SHOT","ASSIST","GOAL"].includes(critere))
    return "category-offense";
  if(["SAVE","RECOVERY"].includes(critere))
    return "category-defense";
  return "category-discipline";
 }
- 
+
 function addEvent(playerId,critere,el){
  processEvent(playerId,critere,el);
  if(RULES[critere]){
@@ -177,6 +179,8 @@ function processEvent(playerId,critere,el){
   critere
  });
  el.querySelector(".counter").textContent++;
+ el.classList.add("flash");
+ setTimeout(()=>el.classList.remove("flash"),120);
 }
 
 function removeEvent(e,playerId,critere,minusEl){
@@ -216,7 +220,6 @@ function endMatch(){
 }
 
 </script>
+
 </body>
-
 </html>
-
