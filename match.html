@@ -272,6 +272,11 @@ function findCell(playerId,critere){
 
 function endMatch(){
 
+ if(log.length === 0){
+  alert("Aucune donnée à exporter.");
+  return;
+ }
+
  let csv="timestamp,tournament,phase,match,station,player_id,critere\n";
 
  log.forEach(e=>{
@@ -280,21 +285,34 @@ function endMatch(){
 
  const blob=new Blob([csv],{type:"text/csv"});
  const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url;
- a.download=`${matchNumber}_${station}.csv`;
- a.click();
 
- // RESET CONTEXTE MATCH (pas tournament)
- localStorage.removeItem("current_team");
- localStorage.removeItem("phase");
- localStorage.removeItem("match_number");
- localStorage.removeItem("station_id");
+ // Détection mobile
+ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
- window.location.replace("index.html");
+ if(isMobile){
+  // Ouvre le CSV dans un nouvel onglet
+  window.open(url, "_blank");
+ } else {
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=`${matchNumber}_${station}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+ }
+
+ setTimeout(()=>{
+  localStorage.removeItem("current_team");
+  localStorage.removeItem("phase");
+  localStorage.removeItem("match_number");
+  localStorage.removeItem("station_id");
+
+  window.location.replace("index.html");
+ },500);
 }
 
 </script>
 
 </body>
 </html>
+
