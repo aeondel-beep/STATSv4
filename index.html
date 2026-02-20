@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Station Stats V4</title>
+<title>Station Stats V7</title>
 
 <style>
 :root {
     --bg: #f4f6f9;
-    --card: #ffffff;
     --border: #e0e4ea;
-    --offense: #ffe9d6;
-    --defense: #d9ecff;
-    --discipline: #ffdcdc;
-    --special: #eadcff;
+
+    --offense: #ffe0cc;
+    --defense: #d6ebff;
+    --discipline: #ffd6d6;
+
     --accent: #1f2937;
 }
 
@@ -31,7 +31,6 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: 500;
 }
 
 .header button {
@@ -41,10 +40,6 @@ body {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-}
-
-.header button:hover {
-    opacity: 0.9;
 }
 
 /* GRID */
@@ -58,15 +53,14 @@ body {
 .player-header {
     text-align: center;
     font-weight: 700;
-    background: var(--card);
-    padding: 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
 }
 
-/* CATEGORY STRIP */
+/* CATEGORY */
 .category {
     grid-column: span 4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 8px 12px;
     font-weight: 700;
     border-radius: 6px;
@@ -76,61 +70,55 @@ body {
 .offense { background: var(--offense); }
 .defense { background: var(--defense); }
 .discipline { background: var(--discipline); }
-.special { background: var(--special); }
+
+.cat-totals {
+    font-size: 14px;
+    font-weight: 600;
+}
 
 .criterion {
-    font-weight: 600;
-    background: var(--card);
     padding: 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
+    font-weight: 600;
 }
 
 /* CELLS */
 .cell {
-    background: var(--card);
     border-radius: 10px;
-    border: 1px solid var(--border);
     cursor: pointer;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-weight: 600;
-    transition: 0.1s;
     min-height: 70px;
+    font-weight: 600;
 }
 
-.cell.main {
-    min-height: 100px;
-    font-size: 18px;
-}
+.cell.main { min-height: 100px; }
 
-.cell:hover {
-    transform: scale(1.03);
-}
+.cell.offense { background: var(--offense); }
+.cell.defense { background: var(--defense); }
+.cell.discipline { background: var(--discipline); }
 
 .cell.flash {
     background: #22c55e !important;
     color: white;
-    transform: scale(0.97);
 }
 
 .counter {
     position: absolute;
     bottom: 6px;
     right: 10px;
-    font-size: 13px;
-    opacity: 0.6;
+    font-size: 14px;
+    font-weight: bold;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    .grid {
-        grid-template-columns: 120px repeat(3, 1fr);
-    }
+.minus {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
 }
 </style>
 </head>
@@ -139,163 +127,222 @@ body {
 
 <div class="header">
     <div>Match Prototype</div>
-    <div>
-        <button onclick="exportCSV()">Export</button>
-        <button onclick="resetData()">Reset</button>
-    </div>
+    <button onclick="endMatch()">Fin de match & Export</button>
 </div>
 
 <div class="grid">
 
-    <div></div>
-    <div class="player-header">J1</div>
-    <div class="player-header">J2</div>
-    <div class="player-header">J3</div>
+<div></div>
+<div class="player-header">J1</div>
+<div class="player-header">J2</div>
+<div class="player-header">J3</div>
 
-    <!-- OFFENSE -->
-    <div class="category offense">OFFENSE</div>
+<!-- OFFENSE -->
+<div class="category offense">
+  OFFENSE
+  <div class="cat-totals">
+    J1: <span id="offJ1">0</span> |
+    J2: <span id="offJ2">0</span> |
+    J3: <span id="offJ3">0</span>
+  </div>
+</div>
 
-    <div class="criterion">SHOT</div>
-    <div class="cell main" onclick="addEvent('J1','SHOT',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J2','SHOT',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J3','SHOT',this)"><span class="counter">0</span></div>
+<div class="criterion">SHOT</div>
+<div class="cell main offense" onclick="addEvent('J1','SHOT',this)">
+<span class="minus" onclick="removeEvent(event,'J1','SHOT',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main offense" onclick="addEvent('J2','SHOT',this)">
+<span class="minus" onclick="removeEvent(event,'J2','SHOT',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main offense" onclick="addEvent('J3','SHOT',this)">
+<span class="minus" onclick="removeEvent(event,'J3','SHOT',this)">−</span>
+<span class="counter">0</span>
+</div>
 
-    <div class="criterion">ASSIST</div>
-    <div class="cell main" onclick="addEvent('J1','ASSIST',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J2','ASSIST',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J3','ASSIST',this)"><span class="counter">0</span></div>
+<div class="criterion">ASSIST</div>
+<div class="cell main offense" onclick="addEvent('J1','ASSIST',this)">
+<span class="minus" onclick="removeEvent(event,'J1','ASSIST',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main offense" onclick="addEvent('J2','ASSIST',this)">
+<span class="minus" onclick="removeEvent(event,'J2','ASSIST',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main offense" onclick="addEvent('J3','ASSIST',this)">
+<span class="minus" onclick="removeEvent(event,'J3','ASSIST',this)">−</span>
+<span class="counter">0</span>
+</div>
 
-    <div class="criterion">GOAL</div>
-    <div class="cell" onclick="addEvent('J1','GOAL',this)"><span class="counter">0</span></div>
-    <div class="cell" onclick="addEvent('J2','GOAL',this)"><span class="counter">0</span></div>
-    <div class="cell" onclick="addEvent('J3','GOAL',this)"><span class="counter">0</span></div>
+<div class="criterion">GOAL</div>
+<div class="cell offense" onclick="addEvent('J1','GOAL',this)">
+<span class="minus" onclick="removeEvent(event,'J1','GOAL',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell offense" onclick="addEvent('J2','GOAL',this)">
+<span class="minus" onclick="removeEvent(event,'J2','GOAL',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell offense" onclick="addEvent('J3','GOAL',this)">
+<span class="minus" onclick="removeEvent(event,'J3','GOAL',this)">−</span>
+<span class="counter">0</span>
+</div>
 
-    <!-- DEFENSE -->
-    <div class="category defense">DEFENSE</div>
+<!-- DEFENSE -->
+<div class="category defense">
+  DEFENSE
+  <div class="cat-totals">
+    J1: <span id="defJ1">0</span> |
+    J2: <span id="defJ2">0</span> |
+    J3: <span id="defJ3">0</span>
+  </div>
+</div>
 
-    <div class="criterion">SAVE</div>
-    <div class="cell main" onclick="addEvent('J1','SAVE',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J2','SAVE',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J3','SAVE',this)"><span class="counter">0</span></div>
+<div class="criterion">SAVE</div>
+<div class="cell main defense" onclick="addEvent('J1','SAVE',this)">
+<span class="minus" onclick="removeEvent(event,'J1','SAVE',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main defense" onclick="addEvent('J2','SAVE',this)">
+<span class="minus" onclick="removeEvent(event,'J2','SAVE',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main defense" onclick="addEvent('J3','SAVE',this)">
+<span class="minus" onclick="removeEvent(event,'J3','SAVE',this)">−</span>
+<span class="counter">0</span>
+</div>
 
-    <div class="criterion">RECOVERY</div>
-    <div class="cell main" onclick="addEvent('J1','RECOVERY',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J2','RECOVERY',this)"><span class="counter">0</span></div>
-    <div class="cell main" onclick="addEvent('J3','RECOVERY',this)"><span class="counter">0</span></div>
+<div class="criterion">RECOVERY</div>
+<div class="cell main defense" onclick="addEvent('J1','RECOVERY',this)">
+<span class="minus" onclick="removeEvent(event,'J1','RECOVERY',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main defense" onclick="addEvent('J2','RECOVERY',this)">
+<span class="minus" onclick="removeEvent(event,'J2','RECOVERY',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell main defense" onclick="addEvent('J3','RECOVERY',this)">
+<span class="minus" onclick="removeEvent(event,'J3','RECOVERY',this)">−</span>
+<span class="counter">0</span>
+</div>
 
-    <!-- DISCIPLINE -->
-    <div class="category discipline">DISCIPLINE</div>
+<!-- DISCIPLINE -->
+<div class="category discipline">
+  DISCIPLINE
+  <div class="cat-totals">
+    J1: <span id="disJ1">0</span> |
+    J2: <span id="disJ2">0</span> |
+    J3: <span id="disJ3">0</span>
+  </div>
+</div>
 
-    <div class="criterion">FOUL</div>
-    <div class="cell" onclick="addEvent('J1','FOUL',this)"><span class="counter">0</span></div>
-    <div class="cell" onclick="addEvent('J2','FOUL',this)"><span class="counter">0</span></div>
-    <div class="cell" onclick="addEvent('J3','FOUL',this)"><span class="counter">0</span></div>
-
-    <!-- SPECIAL -->
-    <div class="category special">SPECIAL</div>
-
-    <div class="criterion">OWN_GOAL</div>
-    <div class="cell" onclick="addEvent('J1','OWN_GOAL',this)"><span class="counter">0</span></div>
-    <div class="cell" onclick="addEvent('J2','OWN_GOAL',this)"><span class="counter">0</span></div>
-    <div class="cell" onclick="addEvent('J3','OWN_GOAL',this)"><span class="counter">0</span></div>
+<div class="criterion">FOUL</div>
+<div class="cell discipline" onclick="addEvent('J1','FOUL',this)">
+<span class="minus" onclick="removeEvent(event,'J1','FOUL',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell discipline" onclick="addEvent('J2','FOUL',this)">
+<span class="minus" onclick="removeEvent(event,'J2','FOUL',this)">−</span>
+<span class="counter">0</span>
+</div>
+<div class="cell discipline" onclick="addEvent('J3','FOUL',this)">
+<span class="minus" onclick="removeEvent(event,'J3','FOUL',this)">−</span>
+<span class="counter">0</span>
+</div>
 
 </div>
 
 <script>
 let log = [];
+const RULES = { GOAL: ["SHOT"] };
 
-// 🔵 RÈGLES MÉTIER CENTRALISÉES
-const RULES = {
-    GOAL: ["SHOT"]
-};
-
-// 🔵 FONCTION PRINCIPALE
 function addEvent(player, critere, element) {
-
-    // 1️⃣ Ajouter l’événement principal
     processEvent(player, critere, element);
 
-    // 2️⃣ Vérifier s’il existe des règles associées
     if (RULES[critere]) {
-        RULES[critere].forEach(dependentCritere => {
-
-            // Trouver la cellule correspondante à l’écran
-            let targetCell = findCell(player, dependentCritere);
-
-            processEvent(player, dependentCritere, targetCell);
+        RULES[critere].forEach(dep => {
+            let cell = findCell(player, dep);
+            processEvent(player, dep, cell);
         });
     }
+
+    updateTotals();
 }
 
-
-// 🔵 AJOUT + INCRÉMENT
 function processEvent(player, critere, element) {
-
-    log.push({
-        date: new Date().toISOString(),
-        match_id: "PROTOTYPE",
-        equipe: "A",
-        joueur: player,
-        critere: critere
-    });
-
+    log.push({ date: new Date().toISOString(), joueur: player, critere });
     if (element) {
         let counter = element.querySelector(".counter");
         counter.textContent = parseInt(counter.textContent) + 1;
-
         element.classList.add("flash");
         setTimeout(() => element.classList.remove("flash"), 120);
     }
 }
 
+function removeEvent(e, player, critere, element) {
+    e.stopPropagation();
+    for (let i = log.length - 1; i >= 0; i--) {
+        if (log[i].joueur === player && log[i].critere === critere) {
+            log.splice(i, 1);
+            let counter = element.querySelector(".counter");
+            let val = parseInt(counter.textContent);
+            if (val > 0) counter.textContent = val - 1;
+            break;
+        }
+    }
+    updateTotals();
+}
 
-// 🔵 TROUVER LA CELLULE CORRESPONDANTE
+function updateTotals() {
+    const categories = {
+        off: ["SHOT","ASSIST","GOAL"],
+        def: ["SAVE","RECOVERY"],
+        dis: ["FOUL"]
+    };
+
+    ["J1","J2","J3"].forEach(player => {
+        document.getElementById("off"+player).textContent =
+            log.filter(e => e.joueur === player && categories.off.includes(e.critere)).length;
+
+        document.getElementById("def"+player).textContent =
+            log.filter(e => e.joueur === player && categories.def.includes(e.critere)).length;
+
+        document.getElementById("dis"+player).textContent =
+            log.filter(e => e.joueur === player && categories.dis.includes(e.critere)).length;
+    });
+}
+
 function findCell(player, critere) {
-
-    let criteriaLabels = document.querySelectorAll(".criterion");
-
-    for (let label of criteriaLabels) {
-
+    let labels = document.querySelectorAll(".criterion");
+    for (let label of labels) {
         if (label.textContent.trim() === critere) {
-
             let next = label.nextElementSibling;
             let cells = [];
-
             for (let i = 0; i < 3; i++) {
                 cells.push(next);
                 next = next.nextElementSibling;
             }
-
-            let playerIndex = ["J1","J2","J3"].indexOf(player);
-            return cells[playerIndex];
+            return cells[["J1","J2","J3"].indexOf(player)];
         }
     }
-
     return null;
 }
 
-function exportCSV() {
-    let csv = "date,match_id,equipe,joueur,critere\n";
-    log.forEach(e => {
-        csv += `${e.date},${e.match_id},${e.equipe},${e.joueur},${e.critere}\n`;
-    });
-
+function endMatch() {
+    let csv = "date,joueur,critere\n";
+    log.forEach(e => csv += `${e.date},${e.joueur},${e.critere}\n`);
     let blob = new Blob([csv], { type: 'text/csv' });
     let url = URL.createObjectURL(blob);
     let a = document.createElement('a');
     a.href = url;
     a.download = "match_export.csv";
     a.click();
-}
-
-function resetData() {
     log = [];
     document.querySelectorAll(".counter").forEach(c => c.textContent = "0");
+    updateTotals();
 }
 </script>
 
 </body>
 </html>
-
-
-
