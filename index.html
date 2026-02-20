@@ -204,39 +204,74 @@ body {
 <script>
 let log = [];
 
+// 🔵 RÈGLES MÉTIER CENTRALISÉES
+const RULES = {
+    GOAL: ["SHOT"]
+};
+
+// 🔵 FONCTION PRINCIPALE
 function addEvent(player, critere, element) {
 
-    function logAndIncrement(p, c) {
+    // 1️⃣ Ajouter l’événement principal
+    processEvent(player, critere, element);
 
-        log.push({
-            date: new Date().toISOString(),
-            match_id: "PROTOTYPE",
-            equipe: "A",
-            joueur: p,
-            critere: c
+    // 2️⃣ Vérifier s’il existe des règles associées
+    if (RULES[critere]) {
+        RULES[critere].forEach(dependentCritere => {
+
+            // Trouver la cellule correspondante à l’écran
+            let targetCell = findCell(player, dependentCritere);
+
+            processEvent(player, dependentCritere, targetCell);
         });
+    }
+}
 
-        // Trouver la cellule correspondante
-        let cell = document.querySelector(
-            `.cell[data-player="${p}"][data-critere="${c}"]`
-        );
 
-        if (cell) {
-            let counter = cell.querySelector(".counter");
-            counter.textContent = parseInt(counter.textContent) + 1;
+// 🔵 AJOUT + INCRÉMENT
+function processEvent(player, critere, element) {
 
-            cell.classList.add("flash");
-            setTimeout(() => cell.classList.remove("flash"), 120);
+    log.push({
+        date: new Date().toISOString(),
+        match_id: "PROTOTYPE",
+        equipe: "A",
+        joueur: player,
+        critere: critere
+    });
+
+    if (element) {
+        let counter = element.querySelector(".counter");
+        counter.textContent = parseInt(counter.textContent) + 1;
+
+        element.classList.add("flash");
+        setTimeout(() => element.classList.remove("flash"), 120);
+    }
+}
+
+
+// 🔵 TROUVER LA CELLULE CORRESPONDANTE
+function findCell(player, critere) {
+
+    let criteriaLabels = document.querySelectorAll(".criterion");
+
+    for (let label of criteriaLabels) {
+
+        if (label.textContent.trim() === critere) {
+
+            let next = label.nextElementSibling;
+            let cells = [];
+
+            for (let i = 0; i < 3; i++) {
+                cells.push(next);
+                next = next.nextElementSibling;
+            }
+
+            let playerIndex = ["J1","J2","J3"].indexOf(player);
+            return cells[playerIndex];
         }
     }
 
-    // Toujours enregistrer l’événement principal
-    logAndIncrement(player, critere);
-
-    // Règle métier : GOAL implique SHOT
-    if (critere === "GOAL") {
-        logAndIncrement(player, "SHOT");
-    }
+    return null;
 }
 
 function exportCSV() {
@@ -261,5 +296,6 @@ function resetData() {
 
 </body>
 </html>
+
 
 
