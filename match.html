@@ -206,20 +206,30 @@ function findCell(playerId,critere){
 }
 
 function endMatch(){
+
  let csv="timestamp,tournament,phase,match,station,player_id,critere\n";
  log.forEach(e=>{
   csv+=`${e.timestamp},${e.tournament},${e.phase},${e.matchNumber},${e.station},${e.player_id},${e.critere}\n`;
  });
+
  const blob=new Blob([csv],{type:"text/csv"});
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
  a.href=url;
  a.download=`${matchNumber}_${station}.csv`;
  a.click();
- log=[];
+
+ // Reset sauf Tournament ID
+ localStorage.removeItem("current_team");
+ localStorage.removeItem("phase");
+ localStorage.removeItem("match_number");
+ localStorage.removeItem("station_id");
+
+ window.location.href="index.html";
 }
 
 </script>
 
 </body>
 </html>
+
