@@ -8,16 +8,32 @@
 body{font-family:sans-serif;padding:20px}
 button{margin:4px;padding:6px 10px}
 .selected{background:#22c55e;color:white}
+select,input{padding:6px;margin:4px}
 </style>
 </head>
 <body>
 
 <h2>Tournoi</h2>
 
-<input id="tournamentId" placeholder="Tournament ID">
-<input id="phase" placeholder="Phase">
-<input id="matchNumber" placeholder="Match">
-<input id="station" placeholder="Station A/B">
+<label>Tournament ID</label>
+<input id="tournamentId" oninput="this.value=this.value.toUpperCase()">
+
+<label>Phase</label>
+<select id="phase">
+<option value="RR">Round Robin</option>
+<option value="SR">Swiss Round</option>
+<option value="PhE">Phase Eliminatoire</option>
+</select>
+
+<label>Match</label>
+<input id="matchNumber">
+
+<label>Station</label>
+<select id="station">
+<option value="A">A</option>
+<option value="B">B</option>
+</select>
+
 <button onclick="saveContext()">Valider contexte</button>
 
 <hr>
@@ -36,7 +52,6 @@ Démarrer le match
 
 <script>
 
-// --- Registre permanent ---
 let PLAYERS = JSON.parse(localStorage.getItem("players_registry")) || [
  {id:"P1",full_name:"Pablo Quenum",display_name:""},
  {id:"P2",full_name:"Leo Martin",display_name:""},
