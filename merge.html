@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fusion CSV</title>
+</head>
+<body>
+
+<h2>Fusion Multi-Station</h2>
+
+<input type="file" id="fileA">
+<input type="file" id="fileB">
+<button onclick="merge()">Fusionner</button>
+
+<script>
+
+function merge(){
+ const A=document.getElementById("fileA").files[0];
+ const B=document.getElementById("fileB").files[0];
+ if(!A||!B){alert("Sélectionne les deux fichiers");return;}
+
+ Promise.all([read(A),read(B)]).then(r=>{
+  let a=r[0].trim().split("\n");
+  let b=r[1].trim().split("\n");
+  b.shift();
+  const merged=[a[0]].concat(a.slice(1)).concat(b);
+  download(merged.join("\n"));
+ });
+}
+
+function read(file){
+ return new Promise(res=>{
+  const reader=new FileReader();
+  reader.onload=e=>res(e.target.result);
+  reader.readAsText(file);
+ });
+}
+
+function download(content){
+ const blob=new Blob([content],{type:"text/csv"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download="merged.csv";
+ a.click();
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saisie Match</title>
+<style>
+body{font-family:sans-serif;margin:0;padding:10px}
+.grid{display:grid;grid-template-columns:160px repeat(3,1fr);gap:6px}
+.cell{background:#eee;padding:20px;text-align:center;position:relative;cursor:pointer}
+.minus{position:absolute;top:4px;left:4px;cursor:pointer}
+.counter{position:absolute;bottom:4px;right:6px;opacity:.6}
+</style>
+</head>
+<body>
+
+<h3 id="context"></h3>
+<button onclick="endMatch()">Fin & Export</button>
+
+<div class="grid" id="grid"></div>
+
+<script>
+
+let team=JSON.parse(localStorage.getItem("current_team"));
+if(!team){window.location.href="index.html"}
+
+let tournament=localStorage.getItem("tournament_id");
+let phase=localStorage.getItem("phase");
+let matchNumber=localStorage.getItem("match_number");
+let station=localStorage.getItem("station_id");
+
+document.getElementById("context").textContent=
+`${tournament} | ${phase} | Match ${matchNumber} | Station ${station}`;
+
+let log=[];
+
+const CRITERES=[
+ "SHOT","ASSIST","GOAL",
+ "SAVE","RECOVERY",
+ "FOUL"
+];
+
+const RULES={GOAL:["SHOT"]};
+
+const grid=document.getElementById("grid");
+
+grid.innerHTML="<div></div>"+
+ team.map(p=>`<div><strong>${p.display_name||p.full_name}</strong></div>`).join("");
+
+CRITERES.forEach(c=>{
+ grid.innerHTML+=`<div>${c}</div>`;
+ team.forEach(p=>{
+  grid.innerHTML+=`
+  <div class="cell"
+   onclick="addEvent('${p.id}','${c}',this)">
+   <span class="minus"
+    onclick="removeEvent(event,'${p.id}','${c}',this)">−</span>
+   <span class="counter">0</span>
+  </div>`;
+ });
+});
+
+function addEvent(playerId,critere,el){
+ processEvent(playerId,critere,el);
+ if(RULES[critere]){
+  RULES[critere].forEach(dep=>{
+   const depCell=findCell(playerId,dep);
+   processEvent(playerId,dep,depCell);
+  });
+ }
+}
+
+function processEvent(playerId,critere,el){
+ log.push({
+  timestamp:new Date().toISOString(),
+  tournament,
+  phase,
+  matchNumber,
+  station,
+  player_id:playerId,
+  critere
+ });
+ el.querySelector(".counter").textContent++;
+}
+
+function removeEvent(e,playerId,critere,minusEl){
+ e.stopPropagation();
+ const cell=minusEl.parentElement;
+ for(let i=log.length-1;i>=0;i--){
+  if(log[i].player_id===playerId&&log[i].critere===critere){
+   log.splice(i,1);
+   let c=cell.querySelector(".counter");
+   if(c.textContent>0)c.textContent--;
+   break;
+  }
+ }
+}
+
+function findCell(playerId,critere){
+ const rows=[...grid.children];
+ for(let i=0;i<rows.length;i++){
+  if(rows[i].textContent===critere){
+   return rows[i+1+team.findIndex(p=>p.id===playerId)];
+  }
+ }
+}
+
+function endMatch(){
+ let csv="timestamp,tournament,phase,match,station,player_id,critere\n";
+ log.forEach(e=>{
+  csv+=`${e.timestamp},${e.tournament},${e.phase},${e.matchNumber},${e.station},${e.player_id},${e.critere}\n`;
+ });
+ const blob=new Blob([csv],{type:"text/csv"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download=`${matchNumber}_${station}.csv`;
+ a.click();
+ log=[];
+}
+
+</script>
+</body>
+</html>
