@@ -104,21 +104,36 @@ body {
     color: white;
 }
 
-.counter {
-    position: absolute;
-    bottom: 6px;
-    right: 10px;
-    font-size: 14px;
-    font-weight: bold;
-}
-
+/* BOUTON MOINS PLUS GROS + SURBRILLANCE */
 .minus {
     position: absolute;
     top: 6px;
     left: 8px;
-    font-size: 16px;
+    font-size: 20px;           /* +25% environ */
     font-weight: bold;
+    color: #222;
+    background: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    padding: 2px 6px;
     cursor: pointer;
+    transition: 0.15s;
+}
+
+.minus:hover {
+    background: #ffb3b3;       /* surlignage léger rouge */
+    transform: scale(1.1);
+}
+
+
+/* COMPTEUR PLUS GRAND, CENTRÉ EN BAS, MOINS CONTRASTÉ */
+.counter {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;           /* plus grand */
+    font-weight: 600;
+    opacity: 0.55;             /* moins contrasté */
 }
 </style>
 </head>
@@ -280,17 +295,30 @@ function processEvent(player, critere, element) {
     }
 }
 
-function removeEvent(e, player, critere, element) {
+function removeEvent(e, player, critere, minusElement) {
+
     e.stopPropagation();
+
+    // La vraie cellule est le parent du bouton -
+    let cell = minusElement.parentElement;
+
     for (let i = log.length - 1; i >= 0; i--) {
+
         if (log[i].joueur === player && log[i].critere === critere) {
+
             log.splice(i, 1);
-            let counter = element.querySelector(".counter");
+
+            let counter = cell.querySelector(".counter");
             let val = parseInt(counter.textContent);
-            if (val > 0) counter.textContent = val - 1;
+
+            if (val > 0) {
+                counter.textContent = val - 1;
+            }
+
             break;
         }
     }
+
     updateTotals();
 }
 
@@ -346,3 +374,4 @@ function endMatch() {
 
 </body>
 </html>
+
